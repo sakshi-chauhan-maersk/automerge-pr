@@ -1,37 +1,27 @@
-name: Auto Merge PRs
+name: Auto Merge PR
 
 on:
-  pull_request:
-    branches:
-      - dev
-    types:
-      - opened
-      - synchronize
+    pull_request:
+        types: [opened, synchronize, reopened]
+        branches:
+            - dev
 
 jobs:
-  automerge:
-    if: github.actor == 'aniket-s-maersk'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    automerge:
+        if: github.actor == 'aniket-s-maersk' && github.event.pull_request.head.ref == 'update-doc'
+        runs-on: ubuntu-latest
 
-      - name: Check PR base and head branches
-        run: |
-          echo "Base branch: ${{ github.event.pull_request.base.ref }}"
-          echo "Head branch: ${{ github.event.pull_request.head.ref }}"
-          if [ "${{ github.event.pull_request.base.ref }}" = "dev" ] && [ "${{ github.event.pull_request.head.ref }}" = "update-doc" ]; then
-            echo "Branches match, proceeding with auto-merge."
-          else
-            echo "Branches don't match, skipping auto-merge."
-            exit 1
-          fi
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
 
-      - name: Merge the PR
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin dev
-          git checkout dev
-          git merge --no-ff "refs/pull/${{ github.event.pull_request.number }}/head" -m "Auto-merged PR from aniket"
-          git push origin dev
+            - name: Setup Git
+              run: |
+                    git config user.name "github-actions[bot]"
+                    git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            - name: Merge PR
+              run: |
+                    git checkout dev
+                    git merge --no-ff ${{ github.event.pull_request.head.ref }}
+                    git push origin dev
