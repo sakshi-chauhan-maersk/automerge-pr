@@ -1,33 +1,27 @@
-name: Automerge PRs from PipedreamBot
+name: Auto Merge PR
 
 on:
     pull_request:
         types: [opened, synchronize, reopened]
+        branches:
+            - dev
 
 jobs:
     automerge:
-        if: github.actor == 'aniket-s-maersk' && github.event.pull_request.head.ref == 'update-doc' && github.event.pull_request.base.ref == 'dev'
+        if: github.actor == 'aniket-s-maersk' && github.event.pull_request.head.ref == 'update-doc'
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
-              
 
-            - name: Set up Git
+            - name: Setup Git
               run: |
                     git config user.name "github-actions[bot]"
                     git config user.email "github-actions[bot]@users.noreply.github.com"
 
             - name: Merge PR
               run: |
-                    git fetch origin +refs/pull/${{ github.event.pull_request.number }}/merge
-                    git checkout -qf FETCH_HEAD
-                    git merge --no-ff -m "Auto-merged by GitHub Actions" ${{ github.event.pull_request.head.sha }}
-
-            - name: Push changes
-              run: git push origin ${{ github.event.pull_request.base.ref }}
-              env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
- 
+                    git checkout dev
+                    git merge --no-ff ${{ github.event.pull_request.head.ref }}
+                    git push origin dev
