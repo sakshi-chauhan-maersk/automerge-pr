@@ -1,27 +1,23 @@
 name: Auto Merge PR
-
 on:
-    pull_request:
-        types: [opened, synchronize, reopened]
-        branches:
-            - dev
-
+ pull_request:
+   types: [opened, ready_for_review]
 jobs:
-    automerge:
-        if: github.actor == 'aniket-s-maersk' && github.event.pull_request.head.ref == 'update-doc'
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v2
-
-            - name: Setup Git
-              run: |
-                    git config user.name "github-actions[bot]"
-                    git config user.email "github-actions[bot]@users.noreply.github.com"
-
-            - name: Merge PR
-              run: |
-                    git checkout dev
-                    git merge --no-ff ${{ github.event.pull_request.head.ref }}
-                    git push origin dev
+ auto-merge:
+   runs-on: ubuntu-latest
+   if: github.actor == 'sakshi-chauhan-maersk' 
+   steps:
+     - name: Checkout repository
+       uses: actions/checkout@v3
+     - name: Setup Git
+       run: |
+         git config --global user.name "github-actions"
+         git config --global user.email "actions@github.com"
+     - name: Merge pull request
+       run: |
+         git fetch origin
+         git checkout dev  
+         git merge origin/update-doc  
+         git push origin dev  
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
